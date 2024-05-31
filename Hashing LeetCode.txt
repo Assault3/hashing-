@@ -1,0 +1,186 @@
+___________________________________________________572. Subtree of Another Tree___________________________________________________
+
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ * };
+ */
+class Solution {
+private:
+    bool isSameTree(TreeNode* p, TreeNode* q) 
+    {
+        if (!p && !q) 
+            return true;
+        if ((p && !q) || (!p && q)) 
+            return false;
+        return p->val == q->val && isSameTree(p->left, q->left) && isSameTree(p->right, q->right);
+    }
+public:
+    bool isSubtree(TreeNode* root, TreeNode* subRoot) 
+    {
+        bool left, right;
+        if (root->left) 
+            left = isSubtree(root->left, subRoot);
+        if (root->right) 
+            right = isSubtree(root->right, subRoot);
+        return isSameTree(root, subRoot) || left || right;
+    }
+};
+
+___________________________________________________705. Design HashSet___________________________________________________
+
+class MyHashSet {
+private:
+    vector<bool> v;
+public:
+    MyHashSet() 
+    {
+        v.resize(1000001, false);
+    }
+    
+    void add(int key) 
+    {
+        v[key] = true;
+    }
+    
+    void remove(int key) 
+    {
+        v[key] = false;
+    }
+    
+    bool contains(int key) 
+    {
+        return v[key];
+    }
+};
+
+/**
+ * Your MyHashSet object will be instantiated and called as such:
+ * MyHashSet* obj = new MyHashSet();
+ * obj->add(key);
+ * obj->remove(key);
+ * bool param_3 = obj->contains(key);
+ */
+
+___________________________________________________706. Design HashMap___________________________________________________
+
+struct Node {
+    int key;
+    int val;
+    Node* next;
+
+    Node(int key, int val, Node* next = nullptr)
+    {
+        this->key = key;
+        this->val = val;
+        this->next = next;
+    }
+};
+
+class MyHashMap {
+private:
+    Node* head;
+public:
+    MyHashMap() 
+    {
+        this->head = nullptr;
+    }
+
+    void put(int key, int value) 
+    {
+        Node* newNode = new Node(key, value, this->head);
+        this->head = newNode;
+    }
+
+    int get(int key) 
+    {
+        Node dummy(0, 0, this->head);
+
+        Node* current = &dummy;
+
+        while (current->next != nullptr) 
+        {
+            if (current->next->key == key)
+                return current->next->val;
+
+            current = current->next;
+        }
+
+        return -1;
+    }
+
+    void remove(int key) 
+    {
+        Node dummy(0, 0, this->head);
+
+        Node* current = &dummy;
+
+        while (current->next != nullptr) 
+        {
+            if (current->next->key == key)
+                current->next = current->next->next;
+
+            else
+                current = current->next;
+        }
+
+        this->head = dummy.next;
+    }
+};
+
+/**
+ * Your MyHashMap object will be instantiated and called as such:
+ * MyHashMap* obj = new MyHashMap();
+ * obj->put(key,value);
+ * int param_2 = obj->get(key);
+ * obj->remove(key);
+ */
+
+___________________________________________________3034. Number of Subarrays That Match a Pattern I___________________________________________________
+
+class Solution
+{
+public:
+    int countMatchingSubarrays(vector<int>& nums, vector<int>& pattern)
+    {
+        int n = nums.size();
+        int m = pattern.size();
+        int res = 0;
+        for (int i = 0; i <= n - m - 1; i++)
+        {
+            bool check = true;
+            for (int j = 0; j < m; j++)
+            {
+                if (pattern[j] == 1)
+                {
+                    if (nums[i + j] >= nums[i + j + 1])
+                        check = false;
+                }
+
+                if (pattern[j] == 0)
+                {
+                    if (nums[i + j] != nums[i + j + 1])
+                        check = false;
+                }
+
+                if (pattern[j] == -1)
+                {
+                    if (nums[i + j] <= nums[i + j + 1])
+                        check = false;
+                }
+
+                if (!check)
+                    break;
+            }
+            if (check)
+                res++;
+        }
+        return res;
+    }
+};

@@ -1,0 +1,198 @@
+#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+
+template <typename K, typename V>
+class Map {
+    int size;
+    int init_size;
+    struct Node {
+        K key;
+        V value;
+        int hash;
+        Node* next;
+
+        Node(K key, V value, int hash, Node* next) {
+            this->key = key;
+            this->value = value;
+            this->hash = hash;
+            this->next = next;
+        }
+
+    };
+
+    vector<Node*> table;
+
+public:
+    Map()
+    {
+        size = 0;
+        init_size = 16;
+        table = vector<Node*>(init_size, nullptr);
+    }
+
+
+    int getIndex(K key) {
+        hash<K> hasher;
+        return hasher(key) % init_size;
+    }
+
+
+    void put(K key, V value) {
+        int index = getIndex(key);
+        Node* cur = table[index];
+
+        if (cur == nullptr) {
+            table[index] = new Node(key, value, getIndex(key), nullptr);
+            size++;
+            return;
+        }
+
+        while (cur->next != nullptr) {
+            if (cur->key == key) {
+                cur->value = value;
+                return;
+            }
+            cur = cur->next;
+        }
+
+        if (cur->key == key) {
+            cur->value = value;
+        }
+        else {
+            cur->next = new Node(key, value, getIndex(key), nullptr);
+            size++;
+        }
+    }
+
+    V get(K key)
+    {
+        int index = getIndex(key);
+        Node* cur = table[index];
+
+        while(cur != nullptr)
+        {
+            if(cur->hash == getIndex(key) && cur->key == key)
+            {
+                return cur->value;
+            }
+            cur = cur->next;
+        }
+
+        return V();
+    }
+
+    bool containsKey(K key)
+    {
+        int index = getIndex(key);
+        Node* cur = table[index];
+
+        while (cur != nullptr)
+        {
+            if (cur->hash == getIndex(key) && cur->key == key)
+            {
+                return true;
+            }
+            cur = cur->next;
+        }
+        return false;
+    }
+
+    void remove(K key)
+    {
+        int index = getIndex(key);
+        Node* cur = table[index];
+        Node* prev = nullptr;
+
+        while(cur != nullptr)
+        {
+            if(cur->hash == getIndex(key) && cur->key == key)
+            {
+                if (prev == nullptr)
+                {
+                    table[index] = cur->next;
+                }
+                else
+                {
+                    prev->next = cur->next;
+                }
+                size--;
+                delete cur;
+                return;
+            }
+            prev = cur;
+            cur = cur->next;
+        }
+    }
+
+    friend ostream& operator<<(ostream& os, const Map& map) {
+        os << "{";
+        for (const auto& node : map.table) {
+            Node* cur = node;
+            while (cur != nullptr) {
+                os << "(" << cur->key << ":" << cur->value << ")";
+                cur = cur->next;
+            }
+        }
+        os << "}";
+        return os;
+    }
+
+    ~Map() {
+        for (Node* node : table) {
+            while (node != nullptr) {
+                Node* temp = node;
+                node = node->next;
+                delete temp;
+            }
+        }
+    }
+};
+
+template <typename K> class Set {
+    Map < K, bool > table;
+public:
+    void add(K key) {
+        table.put(key, true);
+    }
+
+    bool contains(K key) {
+        return table.containsKey(key);
+    }
+
+    void remove(K key) {
+        table.remove(key);
+    }
+
+    friend ostream& operator<<(ostream& os, const Set& set) {
+        return os;
+    }
+};
+
+int main() {
+    Map<string, int> map;
+    map.put("Karakat", 100);
+    map.put("Assau", 49);
+    map.put("Dias", 100);
+    map.put("Karakat", 90);
+
+    cout << map.get("Assau") << endl;
+    cout << map.get("Karakat") << endl;
+    cout << map.get("qwerty") << endl;
+    cout << map << endl;
+    cout << map.containsKey("qwerty") << endl;
+
+    Set<int> set;
+    set.add(7);
+    set.add(4);
+    set.add(9);
+    cout << "contain 7: " << set.contains(7) << endl;
+    cout << "contain 4: " << set.contains(4) << endl;
+    cout << "contain 9: " << set.contains(9) << endl;
+    set.remove(4);
+    cout << "contain after remove 4: " << set.contains(4) << endl;
+    //cout << set;
+
+    return 0;
+}
